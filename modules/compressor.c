@@ -67,19 +67,20 @@ int compactar_arquivo(FILE *arquivo_origem, FILE *arquivo_destino) {
     if (!arquivo_origem || !arquivo_destino) return 0;
 
     unsigned int frequencias[256] = {0};
-    int lenght = sizeof(frequencias) / sizeof(int);
+    unsigned int tamanho_original = 0;
 
+    int lenght_array = sizeof(frequencias) / sizeof(int);
     ListaNode *fila_prioridade = NULL;
-    BitBuffer *empacotador = iniciar_buffer(arquivo_destino);
 
     int caractere = fgetc(arquivo_origem);
 
     while (caractere != EOF) {
         frequencias[caractere]++;
+        tamanho_original++;
         caractere = fgetc(arquivo_origem);
     }
 
-    for (int i = 0; i < lenght; i++) {
+    for (int i = 0; i < lenght_array; i++) {
         if (frequencias[i]) {
             Node *node_arvore = criarNode((char)i, frequencias[i]);
             fila_prioridade = enqueue(fila_prioridade, node_arvore);
@@ -97,6 +98,9 @@ int compactar_arquivo(FILE *arquivo_origem, FILE *arquivo_destino) {
 
     Node *raiz = dequeue(&fila_prioridade);
 
+    fwrite(&tamanho_original, sizeof(unsigned int), 1, arquivo_destino);
+
+    BitBuffer *empacotador = iniciar_buffer(arquivo_destino);
     serializar_arvore(raiz, empacotador);
 
     char dictionary[256][COLUNAS];
@@ -128,15 +132,44 @@ int compactar_arquivo(FILE *arquivo_origem, FILE *arquivo_destino) {
 }
 
 int descompactar_arquivo(FILE *arquivo_origem, FILE *arquivo_destino) {
+    if (!arquivo_origem || !arquivo_destino) return 0;
+
+    unsigned int tamanho_original;
+    if (fread(&tamanho_original, sizeof(unsigned int), 1, arquivo_origem) != 1) return 0; // Falha na leitura
+
     BitBuffer *empacotador = iniciar_buffer(arquivo_origem);
-
     Node *raiz = desserializar_arvore(empacotador);
-    Node *atual = raiz;
 
-    int bit;
-
-    while (ler_bit(empacotador) != -1) {
-
+    if (raiz == NULL) {
+        free(empacotador);
+        return 0;
     }
-    
+
+    for (unsigned int i = 0; i < tamanho_original; i++) {
+        Node *atual = raiz;
+
+        if (atual->esq == NULL && atual->dir == NULL) {
+            fputc(atual->caractere, arquivo_destino);
+            continue;
+        }
+
+        while (atual->esq != NULL && atual->dir != NULL) {
+            int bit_atual = ler_bit(empacotador);
+
+            if (bit_atual == 0) {
+                atual = atual->esq;
+            } else if (bit_atual == 1){
+                atual = atual->dir;
+            } else {
+                break;
+            }
+        }
+
+        fputc(atual->caractere, arquivo_destino);
+    }
+
+    liberarArvore(raiz);
+    free(empacotador);
+
+    return 1;
 }

@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "compressor.h"
 #include "priority_queue.h"
 #include "huffman_tree.h"

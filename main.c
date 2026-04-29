@@ -120,6 +120,8 @@ int main () {
                 sprintf(caminho_destino, "./compressed/%s.huff", nome_arquivo);
                 printf("Destino gerado automaticamente: %s\n", caminho_destino);
 
+                mkdir("./compressed");
+
                 FILE *origem = fopen(caminho_origem, "rb");
                 FILE *destino = fopen(caminho_destino, "wb");
 

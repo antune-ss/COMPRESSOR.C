@@ -1,0 +1,11 @@
+# Ignora a pasta output e exe INTEIRA
+output/
+.exe/
+
+# Ignora tudo dentro da pasta inputs, EXCETO o arquivo .gitkeep
+inputs/*
+!inputs/.gitkeep
+
+# Ignora tudo dentro da pasta compressed, EXCETO o arquivo .gitkeep
+compressed/*
+!compressed/.gitkeep

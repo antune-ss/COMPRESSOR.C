@@ -75,6 +75,7 @@ char* show_files(int modo) {
 
 int main () {
     SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
     setlocale(LC_ALL, "pt_BR.UTF-8"); 
     
     int opcao;
@@ -96,11 +97,22 @@ int main () {
                 char *caminho_origem = show_files(1);
                 if (caminho_origem == NULL) break;
 
-                char *nome_arquivo = strrchr(caminho_origem, '/');
-                if (nome_arquivo != NULL) {
-                    nome_arquivo++;
-                } else {
-                    nome_arquivo = caminho_origem;
+               if (caminho_origem[0] == '"') {
+                    memmove(caminho_origem, caminho_origem + 1, strlen(caminho_origem));
+                    caminho_origem[strlen(caminho_origem) - 1] = '\0';
+                }
+
+                int len = strlen(caminho_origem);
+                while (len > 0 && (caminho_origem[len - 1] == ' ' || caminho_origem[len - 1] == '\r')) {
+                    caminho_origem[len - 1] = '\0';
+                    len--;
+                }
+
+                char *nome_arquivo = caminho_origem;
+                for (int j = 0; caminho_origem[j] != '\0'; j++) {
+                    if (caminho_origem[j] == '/' || caminho_origem[j] == '\\') {
+                        nome_arquivo = &caminho_origem[j + 1];
+                    }
                 }
 
                 char caminho_destino[256];
@@ -125,6 +137,8 @@ int main () {
                 compactar_arquivo(origem, destino);
 
                 clock_t fim = clock();
+
+                fflush(destino);
 
                 fseek(origem, 0, SEEK_END); 
                 long tam_origem = ftell(origem);
@@ -156,11 +170,22 @@ int main () {
                 char *caminho_origem = show_files(2);
                 if (caminho_origem == NULL) break;
 
-                char *nome_arquivo = strrchr(caminho_origem, '/');
-                if (nome_arquivo != NULL) {
-                    nome_arquivo++;
-                } else {
-                    nome_arquivo = caminho_origem;
+               if (caminho_origem[0] == '"') {
+                    memmove(caminho_origem, caminho_origem + 1, strlen(caminho_origem));
+                    caminho_origem[strlen(caminho_origem) - 1] = '\0';
+                }
+
+                int len = strlen(caminho_origem);
+                while (len > 0 && (caminho_origem[len - 1] == ' ' || caminho_origem[len - 1] == '\r')) {
+                    caminho_origem[len - 1] = '\0';
+                    len--;
+                }
+
+                char *nome_arquivo = caminho_origem;
+                for (int j = 0; caminho_origem[j] != '\0'; j++) {
+                    if (caminho_origem[j] == '/' || caminho_origem[j] == '\\') {
+                        nome_arquivo = &caminho_origem[j + 1];
+                    }
                 }
 
                 char nome_original[256];
@@ -201,6 +226,8 @@ int main () {
                     fclose(destino);
                     break;
                 }
+
+                fflush(destino);
 
                 fseek(origem, 0, SEEK_END); 
                 long tam_origem = ftell(origem);

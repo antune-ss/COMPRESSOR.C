@@ -104,7 +104,7 @@ int compactar_arquivo(FILE *arquivo_origem, FILE *arquivo_destino) {
     BitBuffer *empacotador = iniciar_buffer(arquivo_destino);
     serializar_arvore(raiz, empacotador);
 
-    char dictionary[256][COLUNAS];
+    char dictionary[256][COLUNAS] = {0};
     char caminho[COLUNAS];
     gerar_dicionario(dictionary, raiz, caminho, 0);
 
@@ -125,9 +125,7 @@ int compactar_arquivo(FILE *arquivo_origem, FILE *arquivo_destino) {
     }
 
     finalizar_escrita(empacotador);
-    
-    fclose(arquivo_origem);
-    fclose(arquivo_destino);
+    liberarArvore(raiz);
     
     return 1;
 }
